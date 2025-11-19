@@ -6,6 +6,7 @@ import java.time.ZoneId;
 import java.util.Optional;
 
 import com.devsuperior.dsmeta.dto.SaleReportDTO;
+import com.devsuperior.dsmeta.dto.SellerMinDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,20 +32,9 @@ public class SaleService {
 
 
     public Page<SaleReportDTO> getReport(String minDate, String maxDate, String name, Pageable pageable){
-        LocalDate maxDateConverted;
-        LocalDate minDateConverted;
-        if (maxDate.isEmpty()) {
-           maxDateConverted = LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault());
-        }
-        else{
-            maxDateConverted = LocalDate.parse(maxDate);
-        }
-        if (minDate.isEmpty()) {
-           minDateConverted = maxDateConverted.minusYears(1L);
-        }
-        else{
-            minDateConverted = LocalDate.parse(minDate);
-        }
+        LocalDate maxDateConverted = maxDateConversion(maxDate);
+        LocalDate minDateConverted = minDateConversion(minDate, maxDateConverted);
+
         Page<Sale> resultPage = repository.searchReport(
                 minDateConverted,
                 maxDateConverted,
@@ -54,4 +44,35 @@ public class SaleService {
 
         return resultPage.map(SaleReportDTO::new);
     }
+
+    public Page<SellerMinDTO> getSummary(String minDate, String maxDate, Pageable pageable){
+        LocalDate maxDateConverted = maxDateConversion(maxDate);
+        LocalDate minDateConverted = minDateConversion(minDate, maxDateConverted);
+
+        return repository.searchSummary(
+                minDateConverted,
+                maxDateConverted,
+                pageable
+        );
+    }
+
+
+    private LocalDate maxDateConversion(String date){
+        if (date.isEmpty()) {
+            return LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault());
+        }
+            return LocalDate.parse(date);
+
+    }
+
+    private LocalDate minDateConversion(String date, LocalDate maxDate){
+        if (date.isEmpty()) {
+            return maxDate.minusYears(1L);
+        }
+        return LocalDate.parse(date);
+
+
+    }
+
+
 }
