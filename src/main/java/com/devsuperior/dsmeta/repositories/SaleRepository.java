@@ -13,11 +13,8 @@ import java.util.List;
 
 public interface SaleRepository extends JpaRepository<Sale, Long> {
 
-    @Query(" SELECT new com.devsuperior.dsmeta.dto.SaleReportDTO(obj)" +
-            "       FROM Sale obj" +
-            "       JOIN obj.seller seller" +
-            "       WHERE obj.date BETWEEN :min AND :max" +
-            "       AND LOWER(seller.name) LIKE LOWER(CONCAT('%', :name, '%'))" )
-    Page<SaleReportDTO> searchReport(LocalDate min, LocalDate max, String name, Pageable pageable);
+    @Query( value = "SELECT obj FROM Sale obj JOIN FETCH obj.seller seller WHERE obj.date BETWEEN :min AND :max AND LOWER(seller.name) LIKE LOWER(CONCAT('%', :name, '%'))",
+            countQuery = "SELECT COUNT(obj) FROM Sale obj WHERE obj.date BETWEEN :min AND :max AND LOWER(obj.seller.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    Page<Sale> searchReport(LocalDate min, LocalDate max, String name, Pageable pageable);
 
 }

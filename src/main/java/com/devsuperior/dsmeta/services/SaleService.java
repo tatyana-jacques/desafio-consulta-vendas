@@ -45,6 +45,13 @@ public class SaleService {
         else{
             minDateConverted = LocalDate.parse(minDate);
         }
-        return repository.searchReport(minDateConverted, maxDateConverted, name,pageable);
+        Page<Sale> resultPage = repository.searchReport(
+                minDateConverted,
+                maxDateConverted,
+                name,
+                pageable
+        );
+
+        return resultPage.map(SaleReportDTO::new);
     }
 }
